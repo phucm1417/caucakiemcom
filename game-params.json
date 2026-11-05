@@ -1,0 +1,51 @@
+{
+  "waitSeconds": {
+    "label": "Thời gian chờ cá",
+    "value": 0.85,
+    "min": 0.7,
+    "max": 5,
+    "step": 0.1
+  },
+  "biteSeconds": {
+    "label": "Thời gian cá cắn",
+    "value": 3.2,
+    "min": 1.5,
+    "max": 6,
+    "step": 0.1
+  },
+  "ringSpeed": {
+    "label": "Tốc độ vòng cắn",
+    "value": 1.0,
+    "min": 0.5,
+    "max": 2,
+    "step": 0.1
+  },
+  "perfectWidth": {
+    "label": "Khoảng hoàn hảo",
+    "value": 0.18,
+    "min": 0.08,
+    "max": 0.35,
+    "step": 0.01
+  },
+  "fishSpeed": {
+    "label": "Tốc độ cá bơi",
+    "value": 32,
+    "min": 5,
+    "max": 60,
+    "step": 1
+  },
+  "musicVolume": {
+    "label": "Âm lượng nhạc",
+    "value": 0.25,
+    "min": 0,
+    "max": 0.7,
+    "step": 0.05
+  },
+  "pullTempo": {
+    "label": "Nhịp kéo cá",
+    "value": 1.7,
+    "min": 1,
+    "max": 2,
+    "step": 0.1
+  }
+}
