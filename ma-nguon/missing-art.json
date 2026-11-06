@@ -1,0 +1,30 @@
+[
+  {
+    "id": "character_015_anchor",
+    "name": "Bạch Nhãn Nhẫn Giả",
+    "group": "character",
+    "variant": "anchor",
+    "reason": "Công cụ tạo ảnh từ chối yêu cầu; không tạo lại."
+  },
+  {
+    "id": "character_015_body_layer",
+    "name": "Bạch Nhãn Nhẫn Giả",
+    "group": "character",
+    "variant": "body_layer",
+    "reason": "Công cụ tạo ảnh từ chối yêu cầu; không tạo lại."
+  },
+  {
+    "id": "character_015_portrait",
+    "name": "Bạch Nhãn Nhẫn Giả",
+    "group": "character",
+    "variant": "portrait",
+    "reason": "Công cụ tạo ảnh từ chối yêu cầu; không tạo lại."
+  },
+  {
+    "id": "character_015_ultimate_icon",
+    "name": "Bạch Nhãn Nhẫn Giả",
+    "group": "character",
+    "variant": "ultimate_icon",
+    "reason": "Công cụ tạo ảnh từ chối yêu cầu; không tạo lại."
+  }
+]

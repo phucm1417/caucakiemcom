@@ -1,0 +1,278 @@
+{
+  "version": 1,
+  "base": {
+    "Attack": 15,
+    "CriticalRate": 0.1,
+    "CriticalDamage": 0.5,
+    "AttackSpeed": 1.25,
+    "ReelSpeed": 1,
+    "QTEAccuracy": 0.16,
+    "ComboBonus": 0.08,
+    "ComboDuration": 4,
+    "LineDurability": 100,
+    "DamageResistance": 0.05,
+    "Recovery": 0.3
+  },
+  "cp": {
+    "Attack": {
+      "reference": 15,
+      "weight": 100
+    },
+    "CriticalRate": {
+      "reference": 0.1,
+      "weight": 30
+    },
+    "CriticalDamage": {
+      "reference": 0.5,
+      "weight": 30
+    },
+    "AttackSpeed": {
+      "reference": 1.25,
+      "weight": 80
+    },
+    "ReelSpeed": {
+      "reference": 1,
+      "weight": 20
+    },
+    "QTEAccuracy": {
+      "reference": 0.16,
+      "weight": 30
+    },
+    "ComboBonus": {
+      "reference": 0.08,
+      "weight": 25
+    },
+    "ComboDuration": {
+      "reference": 4,
+      "weight": 15
+    },
+    "LineDurability": {
+      "reference": 100,
+      "weight": 100
+    },
+    "DamageResistance": {
+      "reference": 0.05,
+      "weight": 25
+    },
+    "Recovery": {
+      "reference": 0.3,
+      "weight": 15
+    }
+  },
+  "ownership": {
+    "character": {
+      "base": {
+        "Attack": 0.8,
+        "CriticalRate": 0.001,
+        "CriticalDamage": 0.006,
+        "ComboDuration": 0.015
+      },
+      "perTier": {
+        "Attack": 0.35,
+        "CriticalDamage": 0.003
+      },
+      "tierSize": 5
+    },
+    "pet": {
+      "base": {
+        "Attack": 0.4,
+        "LineDurability": 2,
+        "Recovery": 0.015
+      },
+      "perTier": {
+        "Attack": 0.25,
+        "LineDurability": 1
+      },
+      "tierSize": 5
+    },
+    "rod": {
+      "base": {
+        "Attack": 2
+      },
+      "perTier": {
+        "Attack": 1.4,
+        "CriticalDamage": 0.03
+      },
+      "tierSize": 1
+    },
+    "line": {
+      "base": {
+        "LineDurability": 10
+      },
+      "perTier": {
+        "LineDurability": 3,
+        "DamageResistance": 0.002
+      },
+      "tierSize": 1
+    },
+    "bag": {
+      "base": {
+        "Recovery": 0.05
+      },
+      "perTier": {
+        "LineDurability": 1
+      },
+      "tierSize": 1
+    },
+    "boat": {
+      "base": {
+        "LineDurability": 8,
+        "Attack": 1
+      },
+      "perTier": {
+        "Recovery": 0.02,
+        "LineDurability": 3
+      },
+      "tierSize": 1
+    }
+  },
+  "upgrades": {
+    "rod": {
+      "category": "Equipment",
+      "stats": {
+        "Attack": 2.4
+      }
+    },
+    "hook": {
+      "category": "Equipment",
+      "stats": {
+        "QTEAccuracy": 0.006,
+        "CriticalRate": 0.005
+      }
+    },
+    "line": {
+      "category": "Equipment",
+      "stats": {
+        "LineDurability": 8,
+        "DamageResistance": 0.005
+      }
+    },
+    "bait": {
+      "category": "Equipment",
+      "stats": {
+        "ReelSpeed": 0.03
+      }
+    },
+    "bag": {
+      "category": "Equipment",
+      "stats": {
+        "LineDurability": 2
+      }
+    },
+    "boat": {
+      "category": "Boat",
+      "stats": {
+        "LineDurability": 4,
+        "Recovery": 0.05
+      }
+    },
+    "pet": {
+      "category": "Pet",
+      "stats": {
+        "Attack": 0.5
+      }
+    }
+  },
+  "rebirth": {
+    "Attack": 3,
+    "CriticalDamage": 0.05,
+    "LineDurability": 5
+  },
+  "limits": {
+    "CriticalRate": 0.85,
+    "DamageResistance": 0.75,
+    "AttackSpeed": 8,
+    "QTEAccuracy": 0.32,
+    "ComboBonus": 2,
+    "minInterval": 0.08
+  },
+  "battle": {
+    "fishHpScale": 3,
+    "bossHpScale": 3,
+    "normalMultiplier": 1,
+    "qteMultiplier": 1.65,
+    "qteCenter": 0.5,
+    "qtePeriod": 2.2,
+    "firstAttackProgress": 0.45,
+    "firstFishProgress": 0,
+    "fishAttack": 8,
+    "fishAttackPerRarity": 1.8,
+    "fishAttackPerZone": 0.25,
+    "bossAttackMultiplier": 1.3,
+    "fishSpeed": 0.55,
+    "fishSpeedPerRarity": 0.025,
+    "bossSpeed": 0.62,
+    "telegraphSeconds": 0.65,
+    "rageHp": 0.33,
+    "alertHp": 0.66,
+    "rageSpeed": 1.35,
+    "alertSpeed": 1.15,
+    "rageDamage": 1.25,
+    "qteGuard": 0.5,
+    "comboCap": 50,
+    "popDuration": 1.05,
+    "critPopDuration": 1.35,
+    "hitPulse": 0.16,
+    "qteFeedback": 0.75,
+    "autoQTEChance": 0.78,
+    "staminaPerAttack": 0.65,
+    "frostSpeed": 0.6,
+    "stormDamage": 1.2,
+    "windDamage": 1.15,
+    "lineRustPerSecond": 1.2,
+    "dotInterval": 1,
+    "phoenixCooldown": 300000,
+    "phoenixLine": 70,
+    "dotMultiplier": 0.5,
+    "shockChance": 0.05,
+    "shockDuration": 1.5,
+    "entangleChance": 0.03,
+    "entangleDuration": 3,
+    "landingSeconds": 0.4
+  },
+  "buffs": {
+    "power": 2,
+    "pull": 1.3,
+    "flow": 1.2,
+    "speed": 2,
+    "skillSpeed": 3,
+    "critRate": 0.1,
+    "titanCost": 0.5,
+    "exhaustedPower": 0.5
+  },
+  "labels": {
+    "Attack": "Tấn công",
+    "CriticalRate": "Tỉ lệ chí mạng",
+    "CriticalDamage": "Sát thương chí mạng",
+    "AttackSpeed": "Tốc độ đánh",
+    "ReelSpeed": "Tốc độ cuộn",
+    "QTEAccuracy": "Cửa sổ QTE",
+    "ComboBonus": "Thưởng mỗi combo",
+    "ComboDuration": "Thời gian combo",
+    "LineDurability": "Độ bền dây",
+    "DamageResistance": "Kháng sát thương",
+    "Recovery": "Hồi dây / giây"
+  },
+  "fishHealth": {
+    "base": 28,
+    "perRarity": 12,
+    "perZone": 2,
+    "perDifficulty": 8,
+    "bossAssist": 0.75
+  },
+  "petCombat": {
+    "damagePerCP": 0.65,
+    "interval": 3.2,
+    "upgradeSpeed": 0.04,
+    "minimumInterval": 1.4,
+    "hitBatch": 0.22
+  },
+  "lobby": {
+    "worldWidth": 504,
+    "worldHeight": 1900,
+    "moveSpeed": 185,
+    "cameraFollow": 6,
+    "chatMax": 80,
+    "chatHistory": 30
+  }
+}

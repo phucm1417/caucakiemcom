@@ -29,9 +29,9 @@
   },
   "fishSpeed": {
     "label": "Tốc độ cá bơi",
-    "value": 32,
+    "value": 48,
     "min": 5,
-    "max": 60,
+    "max": 100,
     "step": 1
   },
   "musicVolume": {
@@ -46,6 +46,41 @@
     "value": 1.7,
     "min": 1,
     "max": 2,
+    "step": 0.1
+  },
+  "attackScale": {
+    "label": "Hệ số sát thương",
+    "value": 1,
+    "min": 0.1,
+    "max": 5,
+    "step": 0.1
+  },
+  "attackRate": {
+    "label": "Tốc độ lượt đánh",
+    "value": 1,
+    "min": 0.25,
+    "max": 3,
+    "step": 0.05
+  },
+  "fishDamage": {
+    "label": "Sát thương phản công",
+    "value": 1,
+    "min": 0.1,
+    "max": 3,
+    "step": 0.1
+  },
+  "qtePeriod": {
+    "label": "Chu kỳ QTE",
+    "value": 2.2,
+    "min": 1,
+    "max": 4,
+    "step": 0.1
+  },
+  "comboScale": {
+    "label": "Hệ số thưởng combo",
+    "value": 1,
+    "min": 0,
+    "max": 3,
     "step": 0.1
   }
 }

@@ -1,0 +1,376 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Đồng Cỏ Ngập</title><style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#183c3e;font-family:system-ui,sans-serif;color:#173d3c}button{font:inherit;touch-action:manipulation;cursor:pointer}body{touch-action:none}main{position:fixed;inset:0;overflow:hidden}canvas{position:absolute;inset:0;width:100%;height:100%}.hud{position:absolute;left:78px;right:132px;top:var(--top-bar-top,98px);height:var(--top-bar-h,52px);display:flex;flex-direction:column;justify-content:center;pointer-events:none}.hud b{font-size:clamp(14px,3.7vw,19px);letter-spacing:-.5px}.hud small{font-size:11px;letter-spacing:2px;font-weight:800}.sound-toggle{position:absolute;left:22px;top:calc(var(--top-bar-top,98px) + 4px);width:44px;height:44px;border:1px solid #cad7bd;border-radius:16px;background:#fff9e9;color:#214e47;font-size:20px;z-index:9}.row{position:absolute;top:var(--row-top,168px);left:22px;right:var(--row-right,22px);display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700}.tag,.pill{background:#fff8e9de;border:1px solid #c6d5be;border-radius:30px;padding:8px 12px}.tag{font-size:10px;letter-spacing:1.6px}.dock{position:absolute;left:22px;right:22px;bottom:142px;max-height:270px;border-radius:26px;background:#fff9ed;border:1px solid #c7d5ba;box-shadow:0 10px 35px #092e3430;padding:20px;text-align:center}.eyebrow{font-size:10px;letter-spacing:2px;color:#6c8873;font-weight:800}.dock h1{font-size:29px;margin:7px 0 8px;letter-spacing:-1px}.dock p{font-size:13px;margin:7px 0 15px;line-height:1.5;color:#587366}.primary{width:100%;min-height:56px;border:0;border-radius:17px;background:#17675c;color:#fff9e9;font-size:16px;font-weight:800;box-shadow:0 4px 0 #0b413d;letter-spacing:1px}.primary:active{transform:translateY(2px)}.primary:disabled{opacity:.65;cursor:default}.collection{display:flex;gap:10px;margin-top:14px}.collection div{flex:1;border:1px solid #d7dfcd;border-radius:12px;padding:8px;font-size:11px;background:#edf2e5}.hidden,[hidden]{display:none!important}#result{position:absolute;left:68px;right:68px;top:59%;background:#fff9ed;border:1px solid #d4c494;border-radius:22px;padding:17px;text-align:center;box-shadow:0 12px 40px #15393830;pointer-events:none}#result h2{font-size:23px;margin:5px}#result p{font-size:12px;margin:5px}#loading{position:absolute;inset:0;z-index:20;background:#e6edd7;display:grid;place-items:center;color:#245b4b;font-weight:700;letter-spacing:2px}#loading span{border-bottom:3px solid #7fa68d;padding:20px}#hint{min-height:20px}@media(max-height:800px){.dock{top:auto;bottom:122px;padding:14px}.dock h1{font-size:22px}.collection{margin-top:8px}.dock p{margin:5px 0 10px}.primary{min-height:48px}.row{font-size:10px}}
+#result{position:static;left:auto;right:auto;top:auto;background:none;border:0;border-radius:0;padding:0 0 12px;box-shadow:none}#play.has-result #subtitle,#play.has-result #hint{display:none}#result h2{font-size:22px}.row{gap:8px}.pill{white-space:nowrap;font-size:11px}.tag{flex-shrink:0}
+</style></head><body><main data-game-root><canvas id="stage"></canvas><div id="loading"><span>ĐANG ĐẾN ĐỒNG CỎ…</span></div><button class="sound-toggle" id="sound" aria-label="Bật hoặc tắt âm thanh">🔊</button><header class="hud"><small>AO NHỎ • CHUYẾN CÂU</small><b id="status">Đồng Cỏ Ngập</b></header><div class="row"><span class="tag">BẢN MẪU 01</span><span class="pill" id="count">Bộ sưu tập · 0 / 2</span></div><section class="dock" id="title" data-screen="title"><div class="eyebrow">MỘT GÓC ĐỒNG CỎ</div><h1>Thả câu, tìm bình yên.</h1><p>Một chuyến câu nhỏ cùng ninja tóc bạc.<br>Chạm đúng nhịp khi cá cắn câu.</p><button class="primary" id="start" data-action="start">BẮT ĐẦU CÂU</button></section><section class="dock" id="play" data-screen="gameplay" hidden><section id="result" data-screen="result" hidden><div class="eyebrow" id="quality">BẮT ĐƯỢC RỒI!</div><h2 id="fishName">Cá chép vàng</h2><p id="reward">Thêm vào bộ sưu tập</p></section><div class="eyebrow" id="subtitle">CHUYẾN CÂU ĐẦU TIÊN</div><p id="hint">Chạm để đưa phao xuống mặt nước.</p><button class="primary" id="action" data-action="fish">THẢ CÂU</button><div class="collection"><div id="goldCard">Cá chép vàng · ?</div><div id="darkCard">Cá trắm đen · ?</div></div></section></main>
+<script>// Host menu capsule: part of every playable shell (inline it as a classic
+// script before the game script and call adoptHostGeometry() once).
+//
+// Every client draws one menu capsule (author avatar + exit) in the top-right
+// corner, just under the status bar; the top-left corner belongs to the game.
+// The constants below are the contract the upload check enforces (rules H1-H4):
+// nothing readable or tappable inside MENU_BOX, nothing above SAFE_TOP or
+// outside the EDGE_GUARD columns, no taps below SAFE_BOTTOM. They mirror
+// layout.css :root and game-tools/src/review_contract.rs (HOST_*); change all
+// three together.
+//
+// Like TikTok / WeChat mini games, the top bar sits on the capsule's centre
+// line when the host reports the real capsule: it may then rise above
+// SAFE_TOP, but its top stays at or below capsule.top - 4 (the checks allow
+// exactly that for items left of the menu box). The second row starts 8 px
+// under the capsule and the bar; while it is still beside the menu box
+// (above y 168) it stops at x 372. Nothing ever enters MENU_BOX.
+//
+// Sources, in order:
+//   1. window.mable.getMenuButtonBoundingClientRect(): synchronous, canvas
+//      logical px { left, top, right, bottom, width, height }, injected by the
+//      host before the game script runs. A rect taller than a capsule (the
+//      host's MENU_BOX fallback) means "no real capsule".
+//   2. `mable:host-geometry` message: the rect with role "menu" is the
+//      capsule. Older hosts send no "menu"; their buttons on the right half
+//      (back / more / app) only nudge the bar inside y 98..160, and the left
+//      half and edge-guard / browser-* bands are ignored.
+//   3. Neither: MENU_BOX, top bar y 98..150, second row from y 168.
+
+var MABLE_HOST = {
+  canvas: { width: 504, height: 1092 },
+  menuBox: { x: 380, y: 0, width: 124, height: 160 },
+  safeTop: 98,
+  safeBottom: 970,
+  edgeGuard: 22,
+  topBarH: 52,
+  rowGap: 8,
+  // Sound toggle (games with audio): this size, at the bar's left end, centred
+  // on it; the bar's other items start soundGap after it.
+  soundSize: 44,
+  soundGap: 12,
+  // The bar's top may sit this far above the capsule's top, no further.
+  capsuleSlack: 4,
+  // Anything taller is a reserved box, not a capsule (32pt is ~45 px at most).
+  capsuleMaxH: 64,
+};
+
+function hostFinite(value) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+// A clamped { left, top, right, bottom, width, height } or null.
+function hostRect(left, top, right, bottom) {
+  var W = MABLE_HOST.canvas.width, H = MABLE_HOST.canvas.height;
+  if (![left, top, right, bottom].every(hostFinite)) return null;
+  var clamp = function (v, hi) { return Math.min(hi, Math.max(0, v)); };
+  var l = clamp(left, W), t = clamp(top, H), r = clamp(right, W), b = clamp(bottom, H);
+  if (!(r > l) || !(b > t)) return null;
+  return { left: l, top: t, right: r, bottom: b, width: r - l, height: b - t };
+}
+
+// A real capsule: on the right half, near the top, capsule-sized.
+function hostCapsule(rect) {
+  var W = MABLE_HOST.canvas.width, H = MABLE_HOST.canvas.height;
+  if (!rect || rect.height > MABLE_HOST.capsuleMaxH || rect.left + rect.width / 2 < W / 2 || rect.top > H / 4) return null;
+  rect.menu = true;
+  return rect;
+}
+
+// The capsule from the synchronous host API, or null.
+function readMenuButton() {
+  try {
+    var api = window.mable && window.mable.getMenuButtonBoundingClientRect;
+    var rect = typeof api === 'function' ? api.call(window.mable) : null;
+    if (!rect) return null;
+    var right = hostFinite(rect.right) ? rect.right : rect.left + rect.width;
+    var bottom = hostFinite(rect.bottom) ? rect.bottom : rect.top + rect.height;
+    return hostCapsule(hostRect(rect.left, rect.top, right, bottom));
+  } catch (_error) {
+    return null;
+  }
+}
+
+// The capsule from a mable:host-geometry payload, or null. `menu` is true
+// only for a role "menu" rect (a capsule host).
+function readHostGeometry(payload) {
+  if (!payload || !payload.canvas || !hostFinite(payload.canvas.width) || !hostFinite(payload.canvas.height)) return null;
+  var rects = Array.isArray(payload.occlusionRects) ? payload.occlusionRects : [];
+  var W = MABLE_HOST.canvas.width, H = MABLE_HOST.canvas.height;
+  var capsule = null;
+  for (var i = 0; i < rects.length; i++) {
+    var r = rects[i];
+    if (!r) continue;
+    var role = String(r.role || '');
+    if (role === 'edge-guard' || role.indexOf('browser-') === 0) continue;
+    var box = hostRect(r.x, r.y, r.x + r.width, r.y + r.height);
+    if (role === 'menu') {
+      var menu = hostCapsule(box);
+      if (menu) return menu;
+      continue;
+    }
+    // Position decides, not the role name: a back button on the right is part
+    // of the buttons there, and nothing on the left is.
+    if (!box || box.left + box.width / 2 < W / 2 || box.top > H / 4 || box.width * box.height > W * H * 0.05) continue;
+    capsule = capsule
+      ? hostRect(Math.min(capsule.left, box.left), Math.min(capsule.top, box.top), Math.max(capsule.right, box.right), Math.max(capsule.bottom, box.bottom))
+      : box;
+  }
+  return capsule;
+}
+
+// The top of the visible canvas from a mable:host-geometry payload (0 if none).
+function readVisibleTop(payload) {
+  var v = payload && payload.visibleRect;
+  return v && hostFinite(v.y) ? Math.min(MABLE_HOST.safeTop, Math.max(0, v.y)) : 0;
+}
+
+// Layout numbers for a capsule rect (null: the MENU_BOX fallback).
+function hostLayout(capsule, visibleTop) {
+  var h = MABLE_HOST, m = h.menuBox, W = h.canvas.width;
+  var menuBottom = m.y + m.height;
+  var round = function (v) { return Math.round(v * 10) / 10; };
+  var barH = h.topBarH, top, rowTop;
+  if (capsule && capsule.menu) {
+    // Centre on the capsule; shrink the bar rather than rise above capsule.top - 4.
+    barH = Math.min(h.topBarH, capsule.height + 2 * h.capsuleSlack);
+    top = Math.max(capsule.top + capsule.height / 2 - barH / 2, capsule.top - h.capsuleSlack, hostFinite(visibleTop) ? visibleTop : 0);
+    top = Math.min(top, menuBottom - barH);
+    rowTop = Math.max(capsule.bottom, top + barH) + h.rowGap;
+  } else {
+    // No capsule, or an older host's buttons: stay in y 98..160.
+    var min = h.safeTop + h.topBarH / 2, max = menuBottom - h.topBarH / 2;
+    var centre = capsule ? Math.min(max, Math.max(min, capsule.top + capsule.height / 2)) : min;
+    top = centre - barH / 2;
+    rowTop = menuBottom + h.rowGap;
+  }
+  top = round(top);
+  rowTop = round(rowTop);
+  var beside = rowTop < menuBottom + h.rowGap;
+  return {
+    menuBox: { left: m.x, top: m.y, right: m.x + m.width, bottom: menuBottom },
+    capsule: capsule,
+    rowCenter: round(top + barH / 2),
+    topBar: { left: h.edgeGuard, right: m.x - h.rowGap, top: top, bottom: round(top + barH) },
+    // Where a canvas-drawn sound toggle goes; other bar items from its right + soundGap.
+    // Never above the bar's top (a short capsule makes the bar shorter than 44).
+    soundButton: {
+      left: h.edgeGuard,
+      top: round(Math.max(top, top + barH / 2 - h.soundSize / 2)),
+      right: h.edgeGuard + h.soundSize,
+      bottom: round(Math.max(top, top + barH / 2 - h.soundSize / 2) + h.soundSize),
+    },
+    soundGap: h.soundGap,
+    rowTop: rowTop,
+    // Right edge of the second row: beside the menu box it stops at x 372.
+    rowRight: beside ? m.x - h.rowGap : W - h.edgeGuard,
+    safeTop: h.safeTop,
+    safeBottom: h.safeBottom,
+    edgeGuard: h.edgeGuard,
+  };
+}
+
+function adoptHostGeometry(onChange) {
+  var root = document.documentElement;
+  var W = MABLE_HOST.canvas.width;
+  var legacy = null, visibleTop = 0;
+  var last = '';
+  function apply() {
+    var layout = hostLayout(readMenuButton() || legacy, visibleTop);
+    var bar = layout.topBar;
+    var key = [bar.top, bar.bottom, layout.rowTop, layout.rowRight].join();
+    if (key === last) return layout;
+    last = key;
+    root.style.setProperty('--top-bar-top', bar.top + 'px');
+    root.style.setProperty('--top-bar-h', Math.round((bar.bottom - bar.top) * 10) / 10 + 'px');
+    root.style.setProperty('--host-row-center', layout.rowCenter + 'px');
+    root.style.setProperty('--row-top', layout.rowTop + 'px');
+    root.style.setProperty('--row-right', W - layout.rowRight + 'px');
+    if (typeof onChange === 'function') onChange(layout);
+    return layout;
+  }
+  function receive(event) {
+    var payload = event && event.data;
+    if (!payload || payload.type !== 'mable:host-geometry' || payload.version !== 1) return;
+    legacy = readHostGeometry(payload);
+    visibleTop = readVisibleTop(payload);
+    apply();
+  }
+  window.addEventListener('message', receive);
+  window.addEventListener('resize', apply);
+  if (window.__mableHostGeometry) receive({ data: window.__mableHostGeometry });
+  try {
+    window.parent.postMessage({ type: 'mable:host-geometry-request', version: 1 }, '*');
+  } catch (_error) {
+    // No parent, or a parent that refuses the message. MENU_BOX stays in force.
+  }
+  apply();
+  return function () {
+    window.removeEventListener('message', receive);
+    window.removeEventListener('resize', apply);
+  };
+}
+</script><script>
+'use strict';adoptHostGeometry();
+const TIP_MAP={"idle": {"safeFrames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "tips": [[264, 65], [264, 67], [270, 80], [271, 80], [265, 66], [258, 56], [254, 51], [262, 64], [271, 81], [271, 82], [259, 58], [254, 51]]}, "cast": {"safeFrames": [0, 1, 2, 3, 8, 11, 12, 13, 14, 15, 16, 17, 18, 19], "tips": [[263, 65], [257, 60], [236, 40], [206, 17], [180, 2], [152, 0], [147, 0], [195, 0], [293, 57], [318, 140], [318, 124], [309, 106], [305, 98], [305, 99], [305, 99], [305, 100], [305, 100], [305, 99], [305, 99], [305, 99]]}, "fishing_wait": {"safeFrames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "tips": [[257, 53], [254, 48], [256, 51], [264, 67], [270, 86], [269, 85], [258, 62], [248, 44], [240, 32], [239, 30], [243, 35], [258, 54]]}, "reel": {"safeFrames": [0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17, 18, 19], "tips": [[263, 65], [262, 63], [255, 52], [242, 37], [226, 23], [200, 6], [185, 0], [172, 0], [169, 0], [169, 0], [172, 0], [186, 1], [202, 7], [225, 24], [239, 35], [253, 51], [259, 59], [263, 65], [263, 65], [263, 66]]}};
+// Game audio on one AudioContext.
+//
+// Every sound effect is decoded once, at load, into an AudioBuffer; playing it
+// starts a cheap AudioBufferSourceNode. Creating an Audio element per sound
+// makes the phone parse and decode the file again on every hit, and at ten
+// sounds a second that alone stalls frames. Music is a single looping element.
+//
+// Tokens are replaced by base64 data URLs when the artifact is built, and a
+// failed optional sound becomes an empty string. The bytes are read straight
+// out of the data URL, since the artifact has no network access.
+//
+// Music and voice lines are carried at the end of the built file so a game
+// that starts from a script at the end of <body> is playable before they have
+// downloaded. Until the page is parsed their tokens read as a short silent
+// clip; the build swaps the real audio into `new Audio(...)` elements and
+// `decodeAudioData` calls on its own, so nothing here has to wait for them.
+function createAudio({ sounds = {}, music = '', musicVolume = 0.5, maxVoices = 12, minGap = 0.06 } = {}) {
+  const Context = window.AudioContext || window.webkitAudioContext;
+  const ctx = Context ? new Context() : null; // starts suspended until a gesture
+  const master = ctx ? ctx.createGain() : null;
+  if (master) master.connect(ctx.destination);
+  const buffers = {};
+  const lastStart = {};
+  let voices = 0;
+  let muted = false;
+  let musicWanted = false;
+
+  function bytesFromDataUrl(url) {
+    const binary = atob(url.slice(url.indexOf(',') + 1));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+  }
+
+  for (const [name, url] of Object.entries(sounds)) {
+    if (!ctx || !url || !url.startsWith('data:')) continue; // failed optional sound: stay silent
+    try {
+      // Callback form also works on older iOS Safari.
+      const decoding = ctx.decodeAudioData(bytesFromDataUrl(url), (buffer) => { buffers[name] = buffer; }, () => {});
+      if (decoding && decoding.catch) decoding.catch(() => {}); // modern browsers also reject the promise
+    } catch (_) { /* undecodable: stay silent */ }
+  }
+
+  // Created once, never per play, and kept in the document: the host mutes the
+  // game by scanning audio and video elements, and a detached element escapes
+  // that scan. Contexts are muted by the host without any help.
+  const track = music ? new Audio(music) : null;
+  if (track) {
+    track.loop = true;
+    track.volume = musicVolume;
+    track.hidden = true;
+    (document.body || document.documentElement).append(track);
+  }
+
+  function audible() { return !muted && !document.hidden; }
+
+  // Browsers only start audio from a gesture, and iOS can suspend the context
+  // again after a call or Siri, so every gesture re-checks it (cheap when running).
+  function unlock() {
+    if (!audible()) return;
+    if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+    if (track && track.paused && musicWanted) track.play().catch(() => {});
+  }
+  // A touch pointerdown is not a user activation; pointerup, touchend and click are.
+  for (const type of ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown']) {
+    addEventListener(type, unlock, { capture: true, passive: true });
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (ctx) ctx.suspend().catch(() => {});
+      if (track) track.pause();
+    } else {
+      unlock();
+    }
+  });
+
+  return {
+    // play('hit') or play('coin', { volume: 0.6, rate: 1 + Math.random() * 0.1 })
+    play(name, { volume = 1, rate = 1 } = {}) {
+      const buffer = buffers[name];
+      if (!buffer || !audible() || ctx.state !== 'running' || voices >= maxVoices) return;
+      const now = ctx.currentTime;
+      if (now - (lastStart[name] ?? -Infinity) < minGap) return; // a burst of hits is one sound
+      lastStart[name] = now;
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.playbackRate.value = rate;
+      let output = source;
+      if (volume !== 1) {
+        const gain = ctx.createGain();
+        gain.gain.value = volume;
+        source.connect(gain);
+        output = gain;
+      }
+      output.connect(master);
+      voices++;
+      source.onended = () => { voices--; };
+      source.start();
+    },
+    startMusic() {
+      musicWanted = true;
+      if (track && audible()) track.play().catch(() => {});
+    },
+    stopMusic() {
+      musicWanted = false;
+      if (track) track.pause();
+    },
+    setMuted(value) {
+      muted = value;
+      if (master) master.gain.value = muted ? 0 : 1;
+      // Pause rather than write track.muted, which belongs to the host's mute.
+      if (track && muted) track.pause();
+      if (!muted) unlock();
+    },
+    setMusicVolume(value) { if(track) track.volume=value; },
+    get muted() { return muted; },
+  };
+}
+
+// Usage: the sounds map holds the exact tokens the audio tools returned, as
+// string literals, so the build can replace them with data URLs.
+// const audio = createAudio({ sounds: { hit: HIT_TOKEN, coin: COIN_TOKEN }, music: THEME_TOKEN });
+// startButton.addEventListener('click', () => { audio.startMusic(); loop.start(); });
+// muteButton.addEventListener('click', () => audio.setMuted(!audio.muted));
+// audio.play('hit');
+
+const audio=createAudio({sounds:{splash:'game-audio://meadow_splash_sound',catch:'game-audio://meadow_catch_sound'},music:'game-audio://meadow_music',musicVolume:0.25});
+const cv=document.getElementById('stage'),g=cv.getContext('2d');const $=id=>document.getElementById(id);let state='title',t=0,phase=0,castCount=0,total=0,owned=[0,0],last=0,acc=0,raf=0,muted=false,ring=0,fxTime=9,fishKind=0,coins=0,perfectCatch=false;
+try{const s=JSON.parse(localStorage.getItem('meadow_art_sample_v1')||'null');if(s){total=s.total||0;owned=s.owned||[0,0];castCount=total;coins=s.coins||0}}catch(e){}
+function param(k){return window.MABLE_PARAMS[k]}
+function updateUI(){const n=(owned[0]>0?1:0)+(owned[1]>0?1:0);$('count').textContent='Bộ sưu tập · '+n+' / 2 · '+coins+' xu';$('goldCard').textContent='Cá chép vàng · '+(owned[0]||'?');$('darkCard').textContent='Cá trắm đen · '+(owned[1]||'?');}
+function setState(s){state=s;phase=0;$('play').classList.toggle('has-result',s==='result');$('result').hidden=s!=='result';const titles={title:'Đồng Cỏ Ngập',idle:'Đồng Cỏ Ngập',cast:'Đang thả câu…',wait:'Chờ cá ghé thăm',bite:'Cá cắn câu!',reel:'Đang kéo cá…',result:'Một món quà từ hồ'};$('status').textContent=titles[s];$('action').disabled=s==='cast'||s==='wait'||s==='reel';$('action').textContent=s==='bite'?'GIẬT CẦN!':s==='result'?'CÂU TIẾP':'THẢ CÂU';$('hint').textContent=s==='bite'?'Chạm khi vòng sáng khớp vòng vàng.':s==='wait'?'Phao khẽ lay… một chú cá đang đến.':s==='cast'?'Cần câu vút nhẹ qua mặt hồ.':s==='reel'?'Giữ vững nào, cá đang lên!':s==='result'?'Đã lưu vào bộ sưu tập của bạn.':'Chạm để đưa phao xuống mặt nước.';}
+function start(){ $('title').hidden=true;$('play').hidden=false;setState('idle');audioStart();}
+function act(){audioStart();if(state==='idle'||state==='result'){castCount++;fishKind=(castCount-1)%2;setState('cast')}else if(state==='bite'){const perfect=Math.abs(ring-.4)<param('perfectWidth');perfectCatch=perfect;$('quality').textContent=perfect?'HOÀN HẢO!':'BẮT ĐƯỢC RỒI!';setState('reel');fxTime=0}}
+$('start').onclick=start;$('action').onclick=act;$('sound').onclick=()=>{muted=!muted;$('sound').textContent=muted?'🔇':'🔊';applyAudio();};
+function audioStart(){audio.startMusic()}function applyAudio(){audio.setMuted(muted)}
+function tick(dt){updateVisual(dt);t+=dt;phase+=dt;fxTime+=dt;if(state==='cast'&&phase>.85){setState('wait');fxTime=0;audio.play('splash')}else if(state==='wait'&&phase>param('waitSeconds')){setState('bite');audio.play('splash')}else if(state==='bite'){ring=(Math.sin(phase*Math.PI*2*param('ringSpeed'))+1)/2;if(phase>param('biteSeconds')){setState('idle');$('hint').textContent='Cá vừa bơi đi — thử lại nhé!'}}else if(state==='reel'&&phase>1){total++;owned[fishKind]++;const gained=(fishKind===0?34:11)*(perfectCatch?2:1);coins+=gained;try{localStorage.setItem('meadow_art_sample_v1',JSON.stringify({total,owned,coins}))}catch(e){}updateUI();$('fishName').textContent=fishKind===0?'Cá chép vàng':'Cá trắm đen';$('reward').textContent='+'+gained+' xu · Đã lưu vào bộ sưu tập';setState('result');fxTime=0;audio.play('catch');}}
+const ART={};let sceneReady=false;
+function asset(key,src){const im=new Image();ART[key]=im;im.onload=()=>{if(key==='background')bakeScene();};if(src)im.src=src;return im;}
+asset('heroIdle','game-asset://fishing_ninja_no_line_idle');asset('heroCast','game-asset://fishing_ninja_no_line_cast');asset('heroWait','game-asset://fishing_ninja_no_line_fishing_wait');asset('heroReel','game-asset://fishing_ninja_no_line_reel');
+asset('background','game-asset://meadow_scene');asset('raft','game-asset://meadow_raft');asset('gold','game-asset://meadow_gold_swim');asset('dark','game-asset://meadow_dark_swim');asset('splash','game-asset://meadow_water_burst');
+const sceneLayer=document.createElement('canvas');sceneLayer.width=1008;sceneLayer.height=2184;const bgc=sceneLayer.getContext('2d');
+function bakeScene(){const im=ART.background;if(!im?.naturalWidth)return;bgc.setTransform(2,0,0,2,0,0);const cut=im.naturalHeight*.68;bgc.drawImage(im,0,0,im.naturalWidth,cut,0,0,504,600);bgc.drawImage(im,0,cut,im.naturalWidth,im.naturalHeight-cut,0,600,504,492);const wash=bgc.createLinearGradient(0,650,0,1092);wash.addColorStop(0,'#173b3d00');wash.addColorStop(1,'#173b3d66');bgc.fillStyle=wash;bgc.fillRect(0,600,504,492);sceneReady=true;}
+const HERO_MAP={idle:{image:'heroIdle',key:'fishing_ninja_no_line_idle'},cast:{image:'heroCast',key:'fishing_ninja_no_line_cast'},fishing_wait:{image:'heroWait',key:'fishing_ninja_no_line_fishing_wait'},reel:{image:'heroReel',key:'fishing_ninja_no_line_reel'}};
+function geom(key){return window.CODEX_SPRITES?.[key]||null}
+function blit(image,key,index,x,y,scale,flip=false,alpha=1){const a=geom(key),im=ART[image];if(!a||!im?.naturalWidth)return;index=Math.max(0,Math.min(a.frames-1,index));g.save();g.translate(x,y);if(flip)g.scale(-1,1);g.globalAlpha=alpha;g.drawImage(im,(index%a.columns)*a.frameWidth,Math.floor(index/a.columns)*a.frameHeight,a.frameWidth,a.frameHeight,-a.frameWidth*scale/2,-a.frameHeight*scale,a.frameWidth*scale,a.frameHeight*scale);g.restore();}
+const fishPool=[];for(let i=0;i<5;i++)fishPool.push({x:65+i*114,y:644+(i%3)*37,kind:i%2,dir:i%2?-1:1,speed:.72+(i%3)*.18});
+let rodX=250,rodY=370,bobX=359,bobY=589,currentHero='idle',currentFrame=0,previousHero='',heroClock=0,volumeLast=-1;
+function updateVisual(dt){for(let i=0;i<fishPool.length;i++){const f=fishPool[i];f.x+=f.dir*param('fishSpeed')*f.speed*dt;if(f.x>570){f.x=570;f.dir=-1}if(f.x< -65){f.x=-65;f.dir=1}}if(previousHero!==currentHero){heroClock=0;previousHero=currentHero}else heroClock+=dt;if(param('musicVolume')!==volumeLast){volumeLast=param('musicVolume');audio.setMusicVolume(volumeLast);}}
+function hero(){currentHero=state==='cast'?'cast':state==='reel'?'reel':state==='wait'||state==='bite'?'fishing_wait':'idle';const a=HERO_MAP[currentHero],d=geom(a.key),map=TIP_MAP[currentHero];if(!d)return;const sequence=map.safeFrames;const position=d.loop?Math.floor(heroClock*d.fps)%sequence.length:Math.min(sequence.length-1,Math.floor(phase*sequence.length/(state==='cast'?.85:1)));currentFrame=sequence[position];const bob=Math.sin(t*1.6)*2;const x=162,y=570+bob,scale=.72;const tip=map.tips[currentFrame];rodX=x-d.frameWidth*scale/2+tip[0]*scale;rodY=y-d.frameHeight*scale+tip[1]*scale;blit(a.image,a.key,currentFrame,x,y,scale);}
+function drawFish(kind,x,y,scale,flip=false,alpha=1){const key=kind===0?'meadow_gold_swim':'meadow_dark_swim',d=geom(key);if(!d)return;blit(kind===0?'gold':'dark',key,Math.floor(t*d.fps)%d.frames,x,y,scale,flip,alpha)}
+function waterEffect(x,y,size){const d=geom('meadow_water_burst'),im=ART.splash;if(!d||!im?.naturalWidth||!d.frameDurationsMs)return;let ms=fxTime*1000,index=0;while(index<d.frameDurationsMs.length&&ms>=d.frameDurationsMs[index]){ms-=d.frameDurationsMs[index];index++}if(index>=d.frames)return;const px=d.pivot?.x??.5,py=d.pivot?.y??.5;g.save();g.globalCompositeOperation=d.blendMode==='additive'?'lighter':'source-over';g.drawImage(im,index%d.columns*d.frameWidth,Math.floor(index/d.columns)*d.frameHeight,d.frameWidth,d.frameHeight,x-px*size,y-py*size,size,size);g.restore();}
+function draw(){const sx=cv.width/504,sy=cv.height/1092;g.setTransform(sx,0,0,sy,0,0);g.imageSmoothingEnabled=true;g.fillStyle='#b9d9cd';g.fillRect(0,0,504,1092);if(sceneReady)g.drawImage(sceneLayer,0,0,1008,2184,0,0,504,1092);
+ for(let i=0;i<fishPool.length;i++){const f=fishPool[i];drawFish(f.kind,f.x,f.y+Math.sin(t*1.5+i)*5,.35,f.dir>0,.83)}
+ const bob=Math.sin(t*1.6)*2;g.save();g.globalAlpha=.18;g.fillStyle='#0d4144';g.beginPath();g.ellipse(157,589,130,12,0,0,Math.PI*2);g.fill();g.restore();if(ART.raft?.naturalWidth)g.drawImage(ART.raft,45,242,574,170,30,545+bob,260,77);
+ hero();const active=state==='cast'||state==='wait'||state==='bite'||state==='reel';if(active){const p=state==='cast'?Math.min(1,phase/.85):1;bobX=rodX+(359-rodX)*p;bobY=state==='cast'?rodY+(589-rodY)*p-100*Math.sin(p*Math.PI):589+Math.sin(t*3)*2;if(state==='reel'){bobX=359+(260-359)*phase;bobY=589-110*Math.sin(Math.min(1,phase)*Math.PI/2)}
+ g.strokeStyle='#244640';g.lineWidth=2.4;g.beginPath();g.moveTo(rodX,rodY);g.quadraticCurveTo(rodX+(bobX-rodX)*.6,rodY+(bobY-rodY)*.35+20,bobX,bobY);g.stroke();g.strokeStyle='#fff5ce';g.lineWidth=1.1;g.stroke();g.save();g.translate(bobX,bobY);g.strokeStyle='#174341';g.lineWidth=1.8;g.fillStyle='#fff5dc';g.beginPath();g.ellipse(0,0,6,9,0,0,Math.PI*2);g.fill();g.stroke();g.fillStyle='#df775b';g.beginPath();g.ellipse(0,-3,5,5,0,Math.PI,Math.PI*2);g.fill();g.restore();
+ if(state!=='reel'&&state!=='cast'){g.strokeStyle='#fff5ce99';g.lineWidth=1.5;g.beginPath();g.ellipse(bobX,bobY+5,17+Math.sin(t*2)*4,5,0,0,Math.PI*2);g.stroke();}}
+ if(state==='bite'){g.strokeStyle='#edc776';g.lineWidth=5;g.beginPath();g.arc(359,589,30,0,Math.PI*2);g.stroke();g.strokeStyle='#fffbea';g.lineWidth=3;g.beginPath();g.arc(359,589,15+ring*38,0,Math.PI*2);g.stroke();g.fillStyle='#fff9e7';g.beginPath();g.arc(359,527,18,0,Math.PI*2);g.fill();g.fillStyle='#246252';g.textAlign='center';g.font='bold 23px system-ui';g.fillText('!',359,536);}
+ if(state==='reel')drawFish(fishKind,bobX,bobY+40,.35,false,1);
+ if(fxTime<1.5)waterEffect(359,state==='result'?567:592,state==='result'?250:210);
+ if(state==='result'){drawFish(fishKind,252,632,.46,false,1);if(phase<1.8){g.save();g.globalAlpha=1-phase/1.8;g.strokeStyle='#ffe6a2';g.lineWidth=2;for(let i=0;i<8;i++){const ang=i*Math.PI/4,x=252+Math.cos(ang)*(50+phase*20),y=575+Math.sin(ang)*(35+phase*12);g.beginPath();g.moveTo(x-4,y);g.lineTo(x+4,y);g.moveTo(x,y-4);g.lineTo(x,y+4);g.stroke()}g.restore();}}
+ window.mableTuningFrame?.();}
+
+function fit(){const d=Math.min(devicePixelRatio||1,2);cv.width=Math.round(innerWidth*d);cv.height=Math.round(innerHeight*d);draw()}function frame(ms){if(!last)last=ms;acc+=Math.min((ms-last)/1000,.1);last=ms;while(acc>=1/60){tick(1/60);acc-=1/60}draw();raf=requestAnimationFrame(frame)}addEventListener('resize',fit);document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(raf);last=0;if(!document.hidden)raf=requestAnimationFrame(frame);applyAudio()});updateUI();fit();$('loading').hidden=true;window.MableBoot?.ready();window.mableTuningReady?.();raf=requestAnimationFrame(frame);
+</script></body></html>

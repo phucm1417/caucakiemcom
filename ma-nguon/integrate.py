@@ -1,0 +1,26 @@
+from pathlib import Path
+import json
+p=Path('src/expansion/menus.js');s=p.read_text();s=s.replace("const LABEL={up:","const LABEL={art:'Thư viện ảnh',up:")
+s=s.replace("['collection','boss']","['collection','boss','art']")
+s=s.replace("if(menuSub==='up'){html='<div class=\"summary\">Nâng cấp vĩnh viễn cho chuyến câu. Trang bị đặc biệt chọn ở các mục bên cạnh.</div>';", "if(menuSub==='art'){html=galleryHTML();}\n else if(menuSub==='up'){html='';")
+s=s.replace("$('panel').innerHTML=html;}","$('panel').classList.toggle('compact-upgrades',menuSub==='up');$('panel').innerHTML=html;}")
+s=s.replace("tile(i<8?'⌖':'✧',z.n", "tile(z.doc?catalogIcon('map',z.doc):'⌖',z.n")
+s=s.replace("tile('♛',b.n", "tile(b.doc?packIcon(artKey('boss',b.doc,'icon')):'♛',b.n")
+s=s.replace("S.collection[f.id]?fishIcon(f):'◇'","fishIcon(f)")
+s=s.replace("tile(ICON[k],d.n", "tile(catalogIcon(k,id),d.n")
+s=s.replace("tile(ICON[k]||'▣',d.n", "tile(catalogIcon(k,id),d.n")
+s=s.replace("(ART.atlantis?.src?'<img src=\"'+ART.atlantis.src+'\" alt=\"\">':'')", "(PACK[artKey('aquarium',S.equip.aquarium)]?'<img class=\"aquarium-base\" src=\"'+PACK[artKey('aquarium',S.equip.aquarium)].s+'\" alt=\"\">':ART.atlantis?.src?'<img src=\"'+ART.atlantis.src+'\" alt=\"\">':'')")
+s=s.replace(".join('')+'</div>';html+='<div class=\"summary\">'+S.tank.length", ".join('')+(PACK[artKey('aquarium',S.equip.aquarium,'foreground')]?'<img class=\"aquarium-front\" src=\"'+PACK[artKey('aquarium',S.equip.aquarium,'foreground')].s+'\" alt=\"\">':'')+'</div>';html+='<div class=\"summary\">'+S.tank.length")
+p.write_text(s)
+p=Path('src/expansion/build.py');s=p.read_text();s=s.replace("html=head+ui+helpers+data+", "late=late.replace(\"setState('idle');write('sound'\",Path('src/expansion/art-runtime.js').read_text()+Path('src/expansion/procedural-fx.js').read_text()+\"\\nsetState('idle');write('sound'\")\nrenderer=renderer.replace(\"if((S.equip.boat===2||S.up.boat>=3)\",\"if(drawPackedBoat(bob)){}else if((S.equip.boat===2||S.up.boat>=3)\")\nrenderer=renderer.replace(\"phase/.85\",\"phase/.5\").replace(\"state==='cast'?.85:1\",\"state==='cast'?.5:.65\")\nhtml=head+ui+helpers+data+Path('src/expansion/packed-art.js').read_text()+")
+p.write_text(s)
+p=Path('src/expansion/engine.js');s=p.read_text().replace("waitSeconds:2.2","waitSeconds:1.25").replace("fishSpeed:24","fishSpeed:32")
+s=s.replace("phase>.85","phase>.5").replace("state==='reel'&&phase>1","state==='reel'&&phase>.65").replace("Math.max(5,14-S.up.boat)","Math.max(2.5,7-S.up.boat*.45)")
+s=s.replace("hp-=power*dt", "hp-=power*param('pullTempo')*dt")
+s=s.replace("perfectWidth:.18,","perfectWidth:.18,pullTempo:1.3,")
+s=s.replace("$('action').classList.remove('pulling');$('action').disabled", "$('action').classList.remove('pulling');$('action').dataset.state=s;$('action').disabled")
+p.write_text(s)
+p=Path('src/game-params.json');d=json.loads(p.read_text());d['waitSeconds']['value']=1.25;d['fishSpeed']['value']=32;d['pullTempo']={'label':'Nhịp kéo cá','value':1.3,'min':1,'max':2,'step':.1};p.write_text(json.dumps(d,ensure_ascii=False))
+p=Path('src/expansion/ui.html');s=p.read_text();css='''
+.compact-upgrades .tile{grid-template-columns:38px 1fr;padding:6px 0;gap:8px;min-height:66px}.compact-upgrades .tile .ico,.compact-upgrades .art-icon{width:36px;height:36px}.compact-upgrades .tile>div:last-child{display:grid;grid-template-columns:minmax(0,1fr) 92px;column-gap:8px}.compact-upgrades h3{font-size:12px;align-self:end}.compact-upgrades p{font-size:10px;line-height:1.25;margin:2px 0}.compact-upgrades .buttons{grid-column:2;grid-row:1/3;align-items:center}.compact-upgrades .buy{width:92px;padding:7px 5px;font-size:11px}.compact-upgrades .tile:last-child .buttons{flex-wrap:wrap}.art-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.art-card{border:1px solid #cedbc4;border-radius:13px;background:#e9efdf;padding:8px;color:#294c41;min-width:0}.art-card .art-icon{width:100%;height:85px}.art-card b{display:block;font-size:10px;line-height:1.3;min-height:28px}.art-card small{font-size:9px}.gallery-groups{display:flex;gap:5px;flex-wrap:wrap}.gallery-groups .buy{padding:7px;font-size:10px}.art-detail{text-align:center}.art-detail .art-icon{width:100%;height:240px}.tank-view .aquarium-base,.tank-view .aquarium-front{opacity:1;object-fit:contain}.aquarium-front{z-index:3;pointer-events:none}.tank-fish{z-index:2}.main-action{transition:background .15s,transform .12s}.main-action[data-state=bite]{background:#cf9140;animation:bitePulse .65s ease-in-out infinite}.main-action.pulling{transform:translateY(2px);box-shadow:0 2px 0 #853c26}.toast{top:auto;bottom:310px}.missing-art{font-size:22px;color:#788c7d}@keyframes bitePulse{50%{box-shadow:0 0 0 5px #edcd6a55}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+''';s=s.replace('</style>',css+'</style>');p.write_text(s)
